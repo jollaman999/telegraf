@@ -345,15 +345,16 @@ finish:
 		log.Printf("D! [inputs.ping] %s", doErr.Error())
 	}
 
-	tags, fields := onFin(packetsSent, rsps, doErr, destination)
+	tags, fields := onFin(packetsSent, rsps, doErr, p.listenAddr, destination)
 	acc.AddFields("ping", fields, tags)
 }
 
-func onFin(packetsSent int, resps []*ping.Response, err error, destination string) (map[string]string, map[string]interface{}) {
+func onFin(packetsSent int, resps []*ping.Response, err error, source string, destination string) (map[string]string, map[string]interface{}) {
 	packetsRcvd := len(resps)
 
 	tags := map[string]string{"url": destination}
 	fields := map[string]interface{}{
+		"source":              source,
 		"result_code":         0,
 		"packets_transmitted": packetsSent,
 		"packets_received":    packetsRcvd,

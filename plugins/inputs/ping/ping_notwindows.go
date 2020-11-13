@@ -19,6 +19,8 @@ func (p *Ping) pingToURL(u string, acc telegraf.Accumulator) {
 	tags := map[string]string{"url": u}
 	fields := map[string]interface{}{"result_code": 0}
 
+	fields["source"] = p.listenAddr
+
 	out, err := p.pingHost(p.Binary, 60.0, p.args(u, runtime.GOOS)...)
 	if err != nil {
 		// Some implementations of ping return a non-zero exit code on
