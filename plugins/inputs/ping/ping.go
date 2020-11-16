@@ -352,9 +352,11 @@ finish:
 func onFin(packetsSent int, resps []*ping.Response, err error, source string, destination string) (map[string]string, map[string]interface{}) {
 	packetsRcvd := len(resps)
 
-	tags := map[string]string{"url": destination}
+	tags := map[string]string{
+		"url":    destination,
+		"source": source,
+	}
 	fields := map[string]interface{}{
-		"source":              source,
 		"result_code":         0,
 		"packets_transmitted": packetsSent,
 		"packets_received":    packetsRcvd,
