@@ -30,6 +30,13 @@ def apply(metric):
 
   ## File containing a Starlark script.
   # script = "/usr/local/bin/myscript.star"
+
+  ## The constants of the Starlark script.
+  # [processors.starlark.constants]
+  #   max_size = 10
+  #   threshold = 0.75
+  #   default_name = "Julia"
+  #   debug_mode = true
 ```
 
 ### Usage
@@ -101,6 +108,12 @@ The ability to load external scripts other than your own is pretty limited. The 
 If you would like to see support for something else here, please open an issue.
 
 ### Common Questions
+
+**What's the performance cost to using Starlark?**
+
+In local tests, it takes about 1µs (1 microsecond) to run a modest script to process one
+metric. This is going to vary with the size of your script, but the total impact is minimal.
+At this pace, it's likely not going to be the bottleneck in your Telegraf setup.
 
 **How can I drop/delete a metric?**
 
@@ -176,9 +189,34 @@ def apply(metric):
 def failing(metric):
     json.decode("non-json-content")
 ```
+**How to reuse the same script but with different parameters?**
+
+In case you have a generic script that you would like to reuse for different instances of the plugin, you can use constants as input parameters of your script.
+
+So for example, assuming that you have the next configuration:
+
+```toml
+[[processors.starlark]]
+  script = "/usr/local/bin/myscript.star"
+
+  [processors.starlark.constants]
+    somecustomnum = 10
+    somecustomstr = "mycustomfield"
+```
+
+Your script could then use the constants defined in the configuration as follows:
+
+```python
+def apply(metric):
+    if metric.fields[somecustomstr] >= somecustomnum:
+        metric.fields.clear()
+    return metric
+```
 
 ### Examples
 
+- [drop string fields](/plugins/processors/starlark/testdata/drop_string_fields.star) - Drop fields containing string values.
+- [drop fields with unexpected type](/plugins/processors/starlark/testdata/drop_fields_with_unexpected_type.star) - Drop fields containing unexpected value types.
 - [json](/plugins/processors/starlark/testdata/json.star) - an example of processing JSON from a field in a metric
 - [number logic](/plugins/processors/starlark/testdata/number_logic.star) - transform a numerical value to another numerical value
 - [pivot](/plugins/processors/starlark/testdata/pivot.star) - Pivots a key's value to be the key for another key.
@@ -190,6 +228,7 @@ def failing(metric):
 - [multiple metrics](/plugins/processors/starlark/testdata/multiple_metrics.star) - Return multiple metrics by using [a list](https://docs.bazel.build/versions/master/skylark/lib/list.html) of metrics.
 - [multiple metrics from json array](/plugins/processors/starlark/testdata/multiple_metrics_with_json.star) - Builds a new metric from each element of a json array then returns all the created metrics.
 - [custom error](/plugins/processors/starlark/testdata/fail.star) - Return a custom error with [fail](https://docs.bazel.build/versions/master/skylark/lib/globals.html#fail).
+- [compare with previous metric](/plugins/processors/starlark/testdata/compare_metrics.star) - Compare the current metric with the previous one using the shared state.
 
 [All examples](/plugins/processors/starlark/testdata) are in the testdata folder.
 

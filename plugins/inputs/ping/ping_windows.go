@@ -14,7 +14,7 @@ import (
 
 func (p *Ping) pingToURL(u string, acc telegraf.Accumulator) {
 	tags := map[string]string{
-		"source": p.listenAddr,
+		"source": p.sourceAddress,
 		"url"   : u,
 	}
 	fields := map[string]interface{}{"result_code": 0}
